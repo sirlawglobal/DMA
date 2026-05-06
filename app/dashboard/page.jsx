@@ -9,9 +9,9 @@ const STATUS_OPTIONS = ['Released', 'In Transit', 'Delivered'];
 
 function StatusBadge({ status }) {
   const styles = {
-    Released:   { bg: 'var(--status-released-bg)',   color: 'var(--status-released-text)',   border: 'var(--status-released-border)',   dot: 'var(--status-released-dot)' },
-    'In Transit':{ bg: 'var(--status-transit-bg)',    color: 'var(--status-transit-text)',    border: 'var(--status-transit-border)',    dot: 'var(--status-transit-dot)' },
-    Delivered:  { bg: 'var(--status-delivered-bg)',  color: 'var(--status-delivered-text)',  border: 'var(--status-delivered-border)',  dot: 'var(--status-delivered-dot)' },
+    Released: { bg: 'var(--status-released-bg)', color: 'var(--status-released-text)', border: 'var(--status-released-border)', dot: 'var(--status-released-dot)' },
+    'In Transit': { bg: 'var(--status-transit-bg)', color: 'var(--status-transit-text)', border: 'var(--status-transit-border)', dot: 'var(--status-transit-dot)' },
+    Delivered: { bg: 'var(--status-delivered-bg)', color: 'var(--status-delivered-text)', border: 'var(--status-delivered-border)', dot: 'var(--status-delivered-dot)' },
   };
   const s = styles[status] || styles.Released;
   return (
@@ -128,8 +128,10 @@ function UploadModal({ onClose, onSuccess }) {
             onDragLeave={() => setDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]); }}
             className="cursor-pointer rounded-xl p-6 text-center transition-all"
-            style={{ border: `2px dashed ${dragOver ? 'var(--accent)' : file ? 'var(--status-delivered-border)' : 'var(--border)'}`,
-                     background: dragOver ? 'var(--accent-subtle)' : file ? 'var(--status-delivered-bg)' : 'var(--bg-input)' }}>
+            style={{
+              border: `2px dashed ${dragOver ? 'var(--accent)' : file ? 'var(--status-delivered-border)' : 'var(--border)'}`,
+              background: dragOver ? 'var(--accent-subtle)' : file ? 'var(--status-delivered-bg)' : 'var(--bg-input)'
+            }}>
             <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => handleFile(e.target.files[0])} />
             {file ? (
               <>
@@ -197,6 +199,8 @@ export default function DashboardPage() {
   const [filterBatch, setFilterBatch] = useState('All');
   const [updatingId, setUpdatingId] = useState(null);
   const [toast, setToast] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 100;
   const router = useRouter();
 
   // Extract unique batches from records for the filter dropdown
@@ -242,7 +246,7 @@ export default function DashboardPage() {
   const handleDeleteBatch = async () => {
     if (filterBatch === 'All') return;
     if (!window.confirm(`Are you sure you want to delete all records in batch ${filterBatch}? This cannot be undone.`)) return;
-    
+
     try {
       const res = await fetch(`/api/records/bulk?batchId=${encodeURIComponent(filterBatch)}`, {
         method: 'DELETE',
@@ -270,6 +274,15 @@ export default function DashboardPage() {
       .some((v) => v?.toLowerCase().includes(q));
     return matchStatus && matchBatch && matchSearch;
   });
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterStatus, filterBatch]);
+
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paginatedRecords = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const startIdx = (currentPage - 1) * pageSize;
 
   const stats = [
     { label: 'Total', value: records.length, icon: '📋', color: 'var(--stat-total-color)' },
@@ -348,7 +361,7 @@ export default function DashboardPage() {
           {/* Controls */}
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 px-4 sm:px-6 py-4"
             style={{ borderBottom: '1px solid var(--border)' }}>
-            
+
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
               <div className="relative flex-1 sm:w-64 lg:w-72">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>🔍</span>
@@ -356,7 +369,7 @@ export default function DashboardPage() {
                   placeholder="Search waybill, address…" style={inputStyle}
                   className="w-full pl-8 pr-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 placeholder:opacity-40" />
               </div>
-              
+
               <div className="flex gap-3 flex-1 sm:flex-none">
                 <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
                   style={{ ...inputStyle, backgroundImage: 'none' }}
@@ -398,8 +411,8 @@ export default function DashboardPage() {
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>S/N</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>Waybill</th>
                   <th className="hidden md:table-cell px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>Address</th>
-                  <th className="hidden lg:table-cell px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>Person in Charge</th>
-                  <th className="hidden sm:table-cell px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>Batch ID</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>Person in Charge</th>
+                  <th className="hidden lg:table-cell px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>Batch ID</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>Status</th>
                   <th className="hidden lg:table-cell px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>Date / Time</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>Action</th>
@@ -421,16 +434,16 @@ export default function DashboardPage() {
                     </div>
                   </td></tr>
                 ) : (
-                  filtered.map((record, idx) => (
+                  paginatedRecords.map((record, idx) => (
                     <tr key={record._id} style={{ borderBottom: '1px solid var(--border)' }}
                       className="transition-colors hover:bg-[var(--bg-hover)]"
                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = ''}>
-                      <td className="px-4 py-3.5 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{record.serialNumber || idx + 1}</td>
+                      <td className="px-4 py-3.5 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{record.serialNumber || startIdx + idx + 1}</td>
                       <td className="px-4 py-3.5 text-sm font-semibold whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>{record.waybill || '—'}</td>
                       <td className="hidden md:table-cell px-4 py-3.5 text-sm max-w-[200px] truncate" style={{ color: 'var(--text-secondary)' }}>{record.address || '—'}</td>
-                      <td className="hidden lg:table-cell px-4 py-3.5 text-sm whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>{record.personInCharge}</td>
-                      <td className="hidden sm:table-cell px-4 py-3.5">
+                      <td className="px-4 py-3.5 text-sm whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>{record.personInCharge}</td>
+                      <td className="hidden lg:table-cell px-4 py-3.5">
                         <span className="text-xs font-mono px-2 py-0.5 rounded-md"
                           style={{ background: 'var(--accent-subtle)', color: 'var(--accent)' }}>{record.batchId}</span>
                       </td>
@@ -458,14 +471,57 @@ export default function DashboardPage() {
             </table>
           </div>
 
-          {/* Footer */}
+          {/* Footer / Pagination */}
           {!fetching && filtered.length > 0 && (
-            <div className="px-6 py-3 flex items-center justify-between" style={{ borderTop: '1px solid var(--border)' }}>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Showing <span style={{ color: 'var(--text-secondary)' }} className="font-medium">{filtered.length}</span>{' '}
-                of <span style={{ color: 'var(--text-secondary)' }} className="font-medium">{records.length}</span> records
-              </p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Last refreshed: {new Date().toLocaleTimeString()}</p>
+            <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
+              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                Showing <span style={{ color: 'var(--text-secondary)' }} className="font-semibold">{startIdx + 1}</span> to{' '}
+                <span style={{ color: 'var(--text-secondary)' }} className="font-semibold">{Math.min(startIdx + pageSize, filtered.length)}</span> of{' '}
+                <span style={{ color: 'var(--text-secondary)' }} className="font-semibold">{filtered.length}</span> records
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    style={{ border: '1px solid var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-input)' }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-sm disabled:opacity-30 hover:opacity-80 transition-all active:scale-90">
+                    ←
+                  </button>
+
+                  {/* Simple numeric pagination */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) pageNum = i + 1;
+                    else if (currentPage <= 3) pageNum = i + 1;
+                    else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                    else pageNum = currentPage - 2 + i;
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        style={{
+                          background: currentPage === pageNum ? 'var(--accent)' : 'var(--bg-input)',
+                          color: currentPage === pageNum ? 'white' : 'var(--text-secondary)',
+                          border: '1px solid var(--border)'
+                        }}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold hover:opacity-80 transition-all">
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    style={{ border: '1px solid var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-input)' }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-sm disabled:opacity-30 hover:opacity-80 transition-all active:scale-90">
+                    →
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
