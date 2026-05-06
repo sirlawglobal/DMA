@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LogiDMS — Logistics Data Management System",
+  title: "MideLogiTrack — Logistics Data Management System",
   description:
     "Admin dashboard for managing logistics manifests, batch uploads, and delivery tracking.",
 };
