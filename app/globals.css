@@ -1,26 +1,116 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Dark theme (default) ────────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --bg-base:       #0d1117;
+  --bg-surface:    #161b27;
+  --bg-elevated:   #1a2035;
+  --bg-hover:      rgba(255,255,255,0.04);
+  --bg-input:      rgba(255,255,255,0.05);
+
+  --border:        rgba(255,255,255,0.08);
+  --border-focus:  rgba(99,102,241,0.5);
+
+  --text-primary:  #e6edf3;
+  --text-secondary:#8b949e;
+  --text-muted:    #484f58;
+
+  --accent:        #6366f1;
+  --accent-glow:   rgba(99,102,241,0.25);
+  --accent-subtle: rgba(99,102,241,0.12);
+
+  /* Status colours */
+  --status-released-bg:    rgba(249,115,22,0.15);
+  --status-released-text:  #fb923c;
+  --status-released-border:rgba(249,115,22,0.25);
+  --status-released-dot:   #f97316;
+
+  --status-transit-bg:    rgba(59,130,246,0.15);
+  --status-transit-text:  #60a5fa;
+  --status-transit-border:rgba(59,130,246,0.25);
+  --status-transit-dot:   #3b82f6;
+
+  --status-delivered-bg:    rgba(34,197,94,0.15);
+  --status-delivered-text:  #4ade80;
+  --status-delivered-border:rgba(34,197,94,0.25);
+  --status-delivered-dot:   #22c55e;
+
+  /* Stat card accent strips */
+  --stat-total-color:    #a78bfa;
+  --stat-released-color: #fb923c;
+  --stat-transit-color:  #60a5fa;
+  --stat-delivered-color:#4ade80;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Light theme ─────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-base:       #f0f4f9;
+  --bg-surface:    #ffffff;
+  --bg-elevated:   #f8fafc;
+  --bg-hover:      rgba(0,0,0,0.03);
+  --bg-input:      rgba(0,0,0,0.04);
+
+  --border:        rgba(0,0,0,0.09);
+  --border-focus:  rgba(99,102,241,0.5);
+
+  --text-primary:  #0f172a;
+  --text-secondary:#475569;
+  --text-muted:    #94a3b8;
+
+  --accent:        #4f46e5;
+  --accent-glow:   rgba(79,70,229,0.15);
+  --accent-subtle: rgba(79,70,229,0.08);
+
+  /* Status colours */
+  --status-released-bg:    rgba(234,88,12,0.08);
+  --status-released-text:  #c2410c;
+  --status-released-border:rgba(234,88,12,0.2);
+  --status-released-dot:   #ea580c;
+
+  --status-transit-bg:    rgba(37,99,235,0.08);
+  --status-transit-text:  #1d4ed8;
+  --status-transit-border:rgba(37,99,235,0.2);
+  --status-transit-dot:   #2563eb;
+
+  --status-delivered-bg:    rgba(22,163,74,0.08);
+  --status-delivered-text:  #15803d;
+  --status-delivered-border:rgba(22,163,74,0.2);
+  --status-delivered-dot:   #16a34a;
+
+  --stat-total-color:    #7c3aed;
+  --stat-released-color: #c2410c;
+  --stat-transit-color:  #1d4ed8;
+  --stat-delivered-color:#15803d;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Base ─────────────────────────────────────────────────────────── */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.25s ease, color 0.25s ease;
 }
+
+/* ── Scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── Transitions ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
